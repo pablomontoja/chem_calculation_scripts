@@ -62,7 +62,7 @@ class GaussianLog():
 		gjf_file.append("%chk=" + self.filename.split(".")[0] + ".chk\n")
 		gjf_file.append("%mem=32GB\n")
 		gjf_file.append("%nprocshared=24\n")
-		gjf_file.append("# opt freq wB97XD/6-31g(d)\n")
+		gjf_file.append("# freq wB97XD/6-31g(d)\n")
 		gjf_file.append("\n")
 		gjf_file.append(self.filename + "\n")
 		gjf_file.append("\n")

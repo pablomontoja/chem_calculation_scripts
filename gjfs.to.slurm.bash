@@ -24,6 +24,12 @@ echo "module load apps/gaussian/g16.A.03" >> ${i%%.*}.slurm
 echo "echo 'Temporary files stored in' \$GAUSS_SCRDIR" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
 echo "cp ${i%%.*}.gjf \$GAUSS_SCRDIR/${i%%.*}.gjf" >> ${i%%.*}.slurm
+
+if [ -f "${i%%.*}.chk" ]
+then
+echo "cp ${i%%.*}.chk \$GAUSS_SCRDIR/${i%%.*}.chk" >> ${i%%.*}.slurm
+fi
+
 echo "cd \$GAUSS_SCRDIR" >> ${i%%.*}.slurm
 echo "g16 ${i%%.*}.gjf" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm

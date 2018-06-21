@@ -21,6 +21,8 @@ import numpy as np
 import re
 
 import sys, os, operator, math
+from joblib import Parallel, delayed
+import multiprocessing as mp
 
 R_CONST = 0.0083144598 # kJ/mol*K
 T_CONST = 298.15 # K
@@ -537,25 +539,38 @@ class Result:
 		self.quater = 0
 
 
+class Calculate:	
 
+	def __init__(self, listofcalcs):
+		self.listofcalcs = listofcalcs
+		self.listofresults = []
+		#print(zip([self]*len(self.listofcalcs), self.listofcalcs))
+		#self.run()
+		#res = Parallel(n_jobs=8)(delayed(self.run)(i) for i in self.listofcalcs)		
 
-class Calculate:
+	def run(self):
+		#res = Parallel(n_jobs=8)(delayed(self.f)(i) for i in zip([self]*len(self.listofcalcs), self.listofcalcs))
+		p = mp.Pool(processes=8)
+		res = p.map(unwrap_self_f, zip([self]*len(self.listofcalcs), self.listofcalcs))
+		#print res.quater
+		self.listofresults = list(res)
+		
 
-	def __init__(self, structure_a, structure_b, listofresults):
-		self.structure_a = structure_a
-		self.structure_b = structure_b
+	def f(self, calc):
+		structure_a = calc[0]
+		structure_b = calc[1]
 		# self.normal = 0
 		# self.kabsch = 0
 		# self.quater = 0
-		self.format = self.structure_a.split('.')[-1]
-		p_atoms, p_all = get_coordinates(self.structure_a, self.format)
-		q_atoms, q_all = get_coordinates(self.structure_b, self.format)
+		file_format = structure_a.split('.')[-1]
+		p_atoms, p_all = get_coordinates(structure_a, file_format)
+		q_atoms, q_all = get_coordinates(structure_b, file_format)
 		if np.count_nonzero(p_atoms != q_atoms):
 			exit("Atoms not in the same order")
 
 		P = p_all[:]
 		Q = q_all[:]
-		result = Result(self.structure_a, self.structure_b)
+		result = Result(structure_a, structure_b)
 		result.normal = rmsd(P, Q)
 		#print("Normal RMSD: {0}".format(result.normal))
 		Pc = centroid(P)
@@ -566,77 +581,38 @@ class Calculate:
 		result.quater = quaternion_rmsd(P, Q)
 		#print("Kabsch RMSD: {0}".format(result.kabsch))
 		#print("Quater RMSD: {0} {1} {2}".format(result.quater, self.structure_a, self.structure_b))
-		listofresults.append(result)
+		#self.listofresults.append(result)
+		#print result.quater
+		return result
+
+	def results(self):
+		return self.listofresults
 
 
 
-def main():
+def unwrap_self_f(arg, **kwarg):
+    return Calculate.f(*arg, **kwarg)
+
+
+def main(argv):
 	import argparse
-	import sys
+	import sys, getopt
 	import os, operator
 	import glob
-	from multiprocessing import Pool
 
-# 	description = """
-# Calculate Root-mean-square deviation (RMSD) between structure A and B, in XYZ
-# or PDB format, using transformation and rotation. The order of the atoms *must*
-# be the same for both structures.
+	gauss_log = 0
 
-# For more information, usage, example and citation read more at
-# https://github.com/charnley/rmsd
-# """
-# 	epilog = """output:
-#   Normal - RMSD calculated the straight-forward way, no translation or rotation.
-#   Kabsch - RMSD after coordinates are translated and rotated using Kabsch.
-#   Quater - RMSD after coordinates are translated and rotated using quaternions.
-# """
-# 	parser = argparse.ArgumentParser(
-# 					usage='%(prog)s [options] structure_a structure_b',
-# 					description=description,
-# 					formatter_class=argparse.RawDescriptionHelpFormatter,
-# 					epilog=epilog)
-	
-# 	parser.add_argument('-v', '--version', action='version', version='rmsd ' + __version__ + "\nhttps://github.com/charnley/rmsd")
-# 	parser.add_argument('structure_a', metavar='structure_a', type=str, help='Structure in .xyz or .pdb format')
-# 	parser.add_argument('structure_b', metavar='structure_b', type=str)
-# 	parser.add_argument('-o', '--output', action='store_true', help='print out structure A, centered and rotated unto structure B\'s coordinates in XYZ format')
-# 	parser.add_argument('-f', '--format', action='store', help='Format of input files. Valid format are XYZ and PDB', metavar='fmt')
-
-# 	parser.add_argument('-m', '--normal', action='store_true', help='Use no transformation')
-# 	parser.add_argument('-k', '--kabsch', action='store_true', help='Use Kabsch algorithm for transformation')
-# 	parser.add_argument('-q', '--quater', action='store_true', help='Use Quaternion algorithm for transformation')
-
-# 	index_group = parser.add_mutually_exclusive_group()
-# 	index_group.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when calculating RMSD')
-# 	index_group.add_argument('-r', '--remove-idx', nargs='+', type=int, help='index list of atoms NOT to consider', metavar='idx')
-# 	index_group.add_argument('-a', '--add-idx', nargs='+', type=int, help='index list of atoms to consider', metavar='idx')
-
-# 	if len(sys.argv) == 1:
-# 		parser.print_help()
-# 		sys.exit(1)
+	try:
+		opts, args = getopt.getopt(argv,"g")
+	except getopt.GetoptError:
+		print 'conformers_from_mopac_and_calculate_rmsd_gauss_parallel.py'
+		print '-g  jesli logi z gaussiana zamiast z mopaca'
+		sys.exit(2)
+	for opt, arg in opts:
+		if opt == "-x":
+			gauss_log = 1
 
 	listofconformers = []
-	# errorfilescount = len([name for name in glob.glob("*.res")])
-	# print errorfilescount
-
-	# if errorfilescount>0:
-	# 	os.system("mkdir errors")
-
-	# for file in os.listdir(os.path.dirname(os.path.abspath(__file__))):
-	# 	if errorfilescount > 0:
-	# 		if file.endswith(".res"):
-	# 			command1 = "mv "+file.split(".")[0]+".xyz"+" errors/"+file.split(".")[0]+".xyz"
-	# 			os.system(command1)
-	# 			command1 = "mv "+file.split(".")[0]+".arc"+" errors/"+file.split(".")[0]+".arc"
-	# 			os.system(command1)
-	# 			command1 = "mv "+file.split(".")[0]+".mop"+" errors/"+file.split(".")[0]+".mop"
-	# 			os.system(command1)
-	# 			command1 = "mv "+file.split(".")[0]+".out"+" errors/"+file.split(".")[0]+".out"
-	# 			os.system(command1)
-	# 			command1 = "mv "+file.split(".")[0]+".pbs"+" errors/"+file.split(".")[0]+".pbs"
-	# 			os.system(command1)
-	# 			command1 = "mv "+file.split(".")[0]+".res"+" errors/"+file.split(".")[0]+".res"
-	# 			os.system(command1)
 
 
 	for file in os.listdir(os.path.dirname(os.path.abspath(__file__))):
@@ -661,24 +637,31 @@ def main():
 			os.system(command3)
 
 
-	
-	listofresults = []
-
-	# for file in os.listdir(os.path.dirname(os.path.abspath(__file__))):
-	# 	if file.endswith(".xyz"):
-	# 		listoffiles.append(file)
+	listofcalcs = []
 
 	count = len(listoffiles)
+	print count
 
 	for idx, val in enumerate(listoffiles):
 		for x in listoffiles[idx+1:]:
-			Calculate(val,x,listofresults)
+			listofcalcs.append([val,x])
+			#Calculate(val,x,listofresults)
+
+	# for x in listofcalcs:
+	# 	print x[0] + " - " + x[1]
+
+	a = Calculate(listofcalcs)
+	a.run()
+
+	print a.listofresults.count
+
+	
 
 	filestoremove = []
 
-	listofresults.sort(key=operator.attrgetter('quater'))
+	a.listofresults.sort(key=operator.attrgetter('quater'))
 	print "Normal" + "\t:\t" + "Kabsch" + "\t:\t" + "Quater" + "\t:\t" + "File 1" + "\t:\t" + "File 2"
-	for res in listofresults:		
+	for res in a.listofresults:		
 		if res.quater < 1.5: 
 			print str(res.normal) + "\t:\t" + str(res.kabsch) + "\t:\t" + str(res.quater) + "\t:\t" + str(res.filename1) + "\t:\t" + str(res.filename2)
 			templistofconformers = []
@@ -709,7 +692,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	main(sys.argv[1:])
 
 
 #########################################################################################

@@ -13,6 +13,8 @@ class GaussianFile:
 		self.first_blank_line = 0
 		self.second_blank_line = 0
 		self.third_blank_line = 0
+		self.gfc_matrix = []
+		self.mgfc_matrix = []
 
 		#file = open(filename, "r")
 		with open(self.filename, 'r') as file:
@@ -50,26 +52,39 @@ class GaussianFile:
 		y = 1
 		first_atom = int(atoms_range.split("-")[0])
 		last_atom = int(atoms_range.split("-")[1])
-		print first_atom
-		print last_atom
-		for line in self.counter_filedata[self.second_blank_line:self.third_blank_line-2]:
-			if first_atom-1 >= y <= last_atom:
-				self.counter_filedata[self.second_blank_line+y+1] = self.counter_filedata[self.second_blank_line+y+1].rstrip() + " 1\n"
+		# print first_atom
+		# print last_atom
+		begin_of_matrix = self.second_blank_line+2
+		end_of_matrix = self.third_blank_line
+		index = 1
+		for x in range(begin_of_matrix, end_of_matrix):
+			if first_atom <= index <= last_atom:
+				self.gfc_matrix.append(self.counter_filedata[x])
+				self.counter_filedata[x] = self.counter_filedata[x].rstrip() + " 2\n"						
 			else:
-				self.counter_filedata[self.second_blank_line+y+1] = self.counter_filedata[self.second_blank_line+y+1].rstrip() + " 2\n"
-			y = y + 1
+				self.mgfc_matrix.append(self.counter_filedata[x])
+				self.counter_filedata[x] = self.counter_filedata[x].rstrip() + " 1\n"
+			index += 1
+		# for line in self.counter_filedata[self.second_blank_line:self.third_blank_line-2]:
+		# 	print line
+		# 	if first_atom-1 >= y <= last_atom:
+		# 		self.counter_filedata[self.second_blank_line+y+1] = self.counter_filedata[self.second_blank_line+y+1].rstrip() + " 1\n"
+		# 	else:
+		# 		self.counter_filedata[self.second_blank_line+y+1] = self.counter_filedata[self.second_blank_line+y+1].rstrip() + " 2\n"
+		# 	y = y + 1
 		self.counter_filedata[self.first_blank_line-1] = self.counter_filedata[self.first_blank_line-1].rstrip() + " Counterpoise=2\n"
-		print self.counter_filedata[self.first_blank_line-1]
+		# print self.counter_filedata[self.first_blank_line-1]
 		self.counter_filedata[self.second_blank_line+1] = "1 1 0 1 1 1\n"
-		print self.counter_filedata[self.second_blank_line+1]
+		# print self.counter_filedata[self.second_blank_line+1]
 
 	def mgfcFile(self, atoms_range):
 		first_atom = int(atoms_range.split("-")[0])
 		last_atom = int(atoms_range.split("-")[1])
-		cut_position = first_atom + self.second_blank_line + 1
+		cut_position = self.second_blank_line + 2
 		self.mgfc_filedata = list(self.filedata)[:cut_position]
 		self.mgfc_filedata[0] = "%chk=" + self.filename.split(".")[0] + '_MGFC.chk' + "\n"
 		self.mgfc_filedata[self.second_blank_line+1] = "0 1\n"
+		self.mgfc_filedata = self.mgfc_filedata + self.mgfc_matrix
 		self.mgfc_filedata.append("\n")
 		if "freq" not in self.mgfc_filedata[self.first_blank_line-1]:
 			self.mgfc_filedata[self.first_blank_line-1] = self.mgfc_filedata[self.first_blank_line-1].rstrip() + " freq\n"
@@ -77,11 +92,15 @@ class GaussianFile:
 	def gfcFile(self, atoms_range):
 		first_atom = int(atoms_range.split("-")[0])
 		last_atom = int(atoms_range.split("-")[1])
-		cut_position1 = self.second_blank_line + 2
-		cut_position2 = first_atom + self.second_blank_line + 1
-		self.gfc_filedata = list(self.filedata)[:cut_position1] + list(self.filedata)[cut_position2:]
+		# cut_position1 = self.second_blank_line + 2
+		# cut_position2 = first_atom + self.second_blank_line + 1
+		cut_position = self.second_blank_line + 2
+		self.gfc_filedata = list(self.filedata)[:cut_position]
+		# self.gfc_filedata = list(self.filedata)[:cut_position1] + list(self.filedata)[cut_position2:]
 		self.gfc_filedata[0] = "%chk=" + self.filename.split(".")[0] + '_GFC.chk' + "\n"
 		self.gfc_filedata[self.second_blank_line+1] = "1 1\n"
+		self.gfc_filedata = self.gfc_filedata + self.gfc_matrix
+		self.gfc_filedata.append("\n")
 		if "freq" not in self.gfc_filedata[self.first_blank_line-1]:
 			self.gfc_filedata[self.first_blank_line-1] = self.gfc_filedata[self.first_blank_line-1].rstrip() + " freq\n"
 
@@ -126,6 +145,8 @@ def main(argv):
 		with open(file.filename.split(".")[0]+'_GFC.gjf', 'w') as writefile:
 			for line in file.gfc_filedata:
 				writefile.write(line)
+		command = "rm "+file.filename
+		os.system(command)
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+	main(sys.argv[1:])
