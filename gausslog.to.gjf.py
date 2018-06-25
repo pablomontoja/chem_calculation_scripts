@@ -14,16 +14,23 @@ class GaussianLog():
 		self.final_matrix = []
 		self.charge = 0
 		self.multiplicity = 0
+		self.calculation_commands = ""
+		self.is_counterpoise = 0
 
 		with open(self.filename, 'r') as file:
 			self.file_content = file.readlines()
 
 		for index, line in enumerate(self.file_content):
+			if '#' in line: self.calculation_commands = line
 			if 'Symbolic Z-matrix:' in line: self.initial_matrix_position = index+2
 			if 'orientation:' in line: self.where_are_matrices.append(index+5)
 			if 'Charge =' in line:
 				self.charge = int(line.split("=")[1].split()[0])
 				self.multiplicity = int(line.split("=")[2].split()[0])
+
+		if 'counterpoise' or 'Counterpoise' in self.calculation_commands:
+			self.is_counterpoise = 1
+			self.initial_matrix_position = self.initial_matrix_position + 2
 
 		self.atoms = self.get_atoms_from_initial_matrix()
 		self.number_of_atoms = len(self.atoms)
@@ -50,7 +57,9 @@ class GaussianLog():
 		print self.number_of_atoms
 
 		for line in self.file_content[self.where_are_matrices[-1]:self.where_are_matrices[-1]+self.number_of_atoms]:
-			if "------------------------------------------------------------" in line == 0: break
+			dash_count = line.count('-')
+			print line
+			if dash_count > 6: break
 			linia = line.strip().split()
 			filter(None, linia)			
 			result.append([linia[3], linia[4], linia[5]])
