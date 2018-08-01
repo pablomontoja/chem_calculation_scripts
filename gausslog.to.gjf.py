@@ -28,9 +28,10 @@ class GaussianLog():
 				self.charge = int(line.split("=")[1].split()[0])
 				self.multiplicity = int(line.split("=")[2].split()[0])
 
-		if 'counterpoise' or 'Counterpoise' in self.calculation_commands:
+		if ('counterpoise' in self.calculation_commands) or ('Counterpoise' in self.calculation_commands):
 			self.is_counterpoise = 1
 			self.initial_matrix_position = self.initial_matrix_position + 2
+			
 
 		self.atoms = self.get_atoms_from_initial_matrix()
 		self.number_of_atoms = len(self.atoms)
@@ -39,6 +40,8 @@ class GaussianLog():
 
 		for index, coordinate in enumerate(self.last_matrix):			
 			self.final_matrix.append([self.atoms[index]] + coordinate)
+
+		print self.initial_matrix_position
 
 		self.save_gjf()
 
@@ -53,12 +56,12 @@ class GaussianLog():
 	
 	def get_last_matrix(self):
 		result = []
-		print self.where_are_matrices
-		print self.number_of_atoms
+		#print self.where_are_matrices
+		#print self.number_of_atoms
 
 		for line in self.file_content[self.where_are_matrices[-1]:self.where_are_matrices[-1]+self.number_of_atoms]:
 			dash_count = line.count('-')
-			print line
+			#print line
 			if dash_count > 6: break
 			linia = line.strip().split()
 			filter(None, linia)			
@@ -82,7 +85,7 @@ class GaussianLog():
 
 		gjf_file.append("\n")
 
-		with open(self.filename.split(".")[0]+'.gjf', 'w') as writefile:
+		with open(self.filename.split(".")[0]+'_FREQ.gjf', 'w') as writefile:
 			for line in gjf_file:
 				writefile.write(line)
 

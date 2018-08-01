@@ -21,6 +21,7 @@ echo "#SBATCH --time=72:00:00" >> ${i%%.*}.slurm
 echo "#SBATCH --mem=33GB" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
 echo "module load apps/gaussian/g16.A.03" >> ${i%%.*}.slurm
+#export GAUSS_SCRDIR='/net/scratch/people/plgpswider/slurm_jobdir/12143997'
 echo "echo 'Temporary files stored in' \$GAUSS_SCRDIR" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
 echo "cp ${i%%.*}.gjf \$GAUSS_SCRDIR/${i%%.*}.gjf" >> ${i%%.*}.slurm
