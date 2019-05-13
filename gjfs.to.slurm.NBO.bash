@@ -10,7 +10,7 @@ do
 
 echo "#!/bin/bash -l" >> ${i%%.*}.slurm
 echo "#SBATCH -J ${i%%.*}" >> ${i%%.*}.slurm
-echo "#SBATCH -A cukry2" >> ${i%%.*}.slurm
+echo "#SBATCH -A cukry" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
 echo "#SBATCH -p plgrid" >> ${i%%.*}.slurm
 echo "#SBATCH -N 1" >> ${i%%.*}.slurm
@@ -40,6 +40,9 @@ echo "cp ${i%%.*}.log \$SLURM_SUBMIT_DIR/${i%%.*}.log" >> ${i%%.*}.slurm
 echo "formchk ${i%%.*}.chk ${i%%.*}.fchk" >> ${i%%.*}.slurm
 #echo "zip \$SLURM_SUBMIT_DIR/${i%%.*}.chk.zip ${i%%.*}.chk" >> ${i%%.*}.slurm
 echo "cp ${i%%.*}.fchk \$SLURM_SUBMIT_DIR/${i%%.*}.fchk" >> ${i%%.*}.slurm
+echo "cubegen 24 mo=homo ${i%%.*}.fchk ${i%%.*}_HOMO.cube -3 h" >> ${i%%.*}.slurm
+echo "cubegen 24 mo=lumo ${i%%.*}.fchk ${i%%.*}_LUMO.cube -3 h" >> ${i%%.*}.slurm
+echo "cp *.cube \$SLURM_SUBMIT_DIR" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
 #echo "rm -rf \$GAUSS_SCRDIR" >> ${i%%.*}.slurm
 echo -en  '\n' >> ${i%%.*}.slurm
@@ -48,3 +51,5 @@ echo "sbatch ${i%%.*}.slurm" >> all.script
 done
 
 bash all.script
+
+

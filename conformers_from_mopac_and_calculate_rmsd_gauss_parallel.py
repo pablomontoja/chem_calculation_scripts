@@ -599,6 +599,7 @@ def main(argv):
 	import sys, getopt
 	import os, operator
 	import glob
+	import shutil
 
 	gauss_log = 0
 
@@ -613,11 +614,37 @@ def main(argv):
 			gauss_log = 1
 
 	listofconformers = []
+	error_conformers = []
 
 
 	for file in os.listdir(os.path.dirname(os.path.abspath(__file__))):
 		if file.endswith(".out"):
-			listofconformers.append(Conformer(file))
+			# sprawdzenie czy nie ma bledu
+			outfile = open(file, "r")
+			for index, line in enumerate(outfile):
+				if "NUMBER OF CYCLES EXCEEDED" in line:
+					error_conformers.append(file)
+					break
+				if "JOB ENDED NORMALLY" in line:
+					listofconformers.append(Conformer(file))
+					break
+
+	print error_conformers
+
+	if len(error_conformers) > 0:
+		current_folder_path = os.path.dirname(os.path.abspath(__file__))
+		error_folder_path = os.path.dirname(os.path.abspath(__file__))+"/error"
+		os.mkdir(error_folder_path)
+		for file in error_conformers:
+			file_current_path = current_folder_path + "/" + file
+			file_new_path = error_folder_path + "/" + file
+			shutil.move(file_current_path, file_new_path)
+			shutil.move(file_current_path.split(".")[0]+".mop", file_new_path.split(".")[0]+".mop")
+			shutil.move(file_current_path.split(".")[0]+".den", file_new_path.split(".")[0]+".den")
+			shutil.move(file_current_path.split(".")[0]+".res", file_new_path.split(".")[0]+".res")
+			shutil.move(file_current_path.split(".")[0]+".xyz", file_new_path.split(".")[0]+".xyz")
+			shutil.move(file_current_path.split(".")[0]+".pbs", file_new_path.split(".")[0]+".pbs")
+		sys.exit("Wykryto " + str(len(error_conformers)) + " plikow z bledem. Zostaly przekopiowane do folderu /error")
 
 
 	listofconformers.sort(key=operator.attrgetter('lastscfenergy'))

@@ -164,15 +164,15 @@ for file in os.listdir(os.path.dirname(os.path.abspath(__file__))):
 listofconformers.sort(key=operator.attrgetter('lastscfenergy'))
 calculateConformers = ConformerTools(listofconformers)
 
-for conf in listofconformers:
-	print conf.filename + "   :   " + str(conf.lastscfenergy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff) + "   :   " + str(conf.termination) + "   :   " + str(conf.thermochemistry) + "   : CP=" + str(conf.counterpoise_corrected_energy)
+# for conf in listofconformers:
+	# print conf.filename + "   :   " + str(conf.lastscfenergy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff) + "   :   " + str(conf.termination) + "   :   " + str(conf.thermochemistry) + "   : CP=" + str(conf.counterpoise_corrected_energy)
 
 
 freeEnergyConformers = [ x for x in listofconformers if x.thermochemistry == 'Thermo' ]
 freeEnergyConformers.sort(key=operator.attrgetter('corrected_free_energy'))
-print "--------------------------------------CP EQUIVALENT ---------------------------------------"
-print calculateConformers.eqv_counterpoise_corrected_energy
-print "-------------------------------------------------------------------------------------------"
+# print "--------------------------------------CP EQUIVALENT ---------------------------------------"
+# print calculateConformers.eqv_counterpoise_corrected_energy
+# print "-------------------------------------------------------------------------------------------"
 
 if len(freeEnergyConformers) != 0:
 	print "---------------------------------------------------------------------------------------"
@@ -180,26 +180,26 @@ if len(freeEnergyConformers) != 0:
 	calculateFreeEnergyConformers = FreeEnergyConformerTools(freeEnergyConformers)
 
 	for conf in freeEnergyConformers:
-		print conf.filename + "   :   G=" + str(conf.corrected_free_energy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff)
+		print conf.filename + "\t|\tE0= " + str(conf.lastscfenergy) + "\t|\tEcp= " + str(conf.counterpoise_corrected_energy) + "\t|\tZPE= " + str(conf.zpe) + "\t|\tHterm= " + str(conf.enthalpy_correction)  + "\t|\tGterm= " + str(conf.free_energy_correction) + "\t|\tH=" + str(conf.corrected_enthalpy) + "\t|\tG=" + str(conf.corrected_free_energy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff)
 
-	print "---------------------------------------------------------------------------------------"
-	print "--------------------------------------EQUIVALENT---------------------------------------"
-	print "---------------------------------------------------------------------------------------"
-	print "Input=EQUIVALENT_OF_CONFORMERS"
-	print "Zero-point correction=" + str(calculateFreeEnergyConformers.eqv_zpe) + " (Hartree/Particle)"
-	print "Thermal correction to Energy=" + str(calculateFreeEnergyConformers.eqv_energy_correction)
-	print "Thermal correction to Enthalpy=" + str(calculateFreeEnergyConformers.eqv_enthalpy_correction)
-	print "Thermal correction to Gibbs Free Energy=" + str(calculateFreeEnergyConformers.eqv_free_energy_correction)
-	print "SCF Done:E(RwB97XD) =  " + str(calculateFreeEnergyConformers.eqv_lastscfenergy)
-	print "Counterpoise corrected energy =  " + str(calculateFreeEnergyConformers.eqv_counterpoise_corrected_energy)
-	print "---------------------------------------------------------------------------------------"
-	print "EQUIVALENT_OF_CONFORMERS"
-	print str(calculateFreeEnergyConformers.eqv_zpe)
-	print str(calculateFreeEnergyConformers.eqv_energy_correction)
-	print str(calculateFreeEnergyConformers.eqv_enthalpy_correction)
-	print str(calculateFreeEnergyConformers.eqv_free_energy_correction)
-	print str(calculateFreeEnergyConformers.eqv_lastscfenergy)
-	print str(calculateFreeEnergyConformers.eqv_counterpoise_corrected_energy)
+	# print "---------------------------------------------------------------------------------------"
+	# print "--------------------------------------EQUIVALENT---------------------------------------"
+	# print "---------------------------------------------------------------------------------------"
+	# print "Input=EQUIVALENT_OF_CONFORMERS"
+	# print "Zero-point correction=" + str(calculateFreeEnergyConformers.eqv_zpe) + " (Hartree/Particle)"
+	# print "Thermal correction to Energy=" + str(calculateFreeEnergyConformers.eqv_energy_correction)
+	# print "Thermal correction to Enthalpy=" + str(calculateFreeEnergyConformers.eqv_enthalpy_correction)
+	# print "Thermal correction to Gibbs Free Energy=" + str(calculateFreeEnergyConformers.eqv_free_energy_correction)
+	# print "SCF Done:E(RwB97XD) =  " + str(calculateFreeEnergyConformers.eqv_lastscfenergy)
+	# print "Counterpoise corrected energy =  " + str(calculateFreeEnergyConformers.eqv_counterpoise_corrected_energy)
+	# print "---------------------------------------------------------------------------------------"
+	# print "EQUIVALENT_OF_CONFORMERS"
+	# print str(calculateFreeEnergyConformers.eqv_zpe)
+	# print str(calculateFreeEnergyConformers.eqv_energy_correction)
+	# print str(calculateFreeEnergyConformers.eqv_enthalpy_correction)
+	# print str(calculateFreeEnergyConformers.eqv_free_energy_correction)
+	# print str(calculateFreeEnergyConformers.eqv_lastscfenergy)
+	# print str(calculateFreeEnergyConformers.eqv_counterpoise_corrected_energy)
 
 
 

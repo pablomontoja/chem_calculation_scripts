@@ -36,3 +36,4 @@ echo "qsub ${i%%.*}.pbs" >> all.script
 done
 
 sed -i '1c\PM7 THREADS=2 CHARGE=1 CYCLES=3000 EPS=4.8 DISEX=3.2' *.mop
+#toluene   sed -i '1c\PM7 THREADS=2 CHARGE=1 CYCLES=3000 EPS=2.4 DISEX=3.5' *.mop

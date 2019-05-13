@@ -22,7 +22,7 @@ echo "#PBS -l nodes=1:ppn=1" >> ${i%%.*}.pbs
 # echo "#PBS -e error.error" >> ${i%%.*}.pbs
 # echo "#PBS -o error.output" >> ${i%%.*}.pbs
 echo "#PBS -l walltime=4:00:00" >> ${i%%.*}.pbs
-echo "#PBS -l mem=400MB" >> ${i%%.*}.pbs
+echo "#PBS -l mem=200MB" >> ${i%%.*}.pbs
 # echo "#PBS -l cput=10000:00:00" >> ${i%%.*}.pbs
 echo -en  '\n' >> ${i%%.*}.pbs
 echo "export LD_LIBRARY_PATH=/opt/mopac:$LD_LIBRARY_PATH" >> ${i%%.*}.pbs
@@ -35,4 +35,4 @@ echo "EOF" >> ${i%%.*}.pbs
 echo "qsub ${i%%.*}.pbs" >> all.script
 done
 
-sed -i '1c\PM7 THREADS=4 CHARGE=1 PRECISE CYCLES=3000 DISP' *.mop
+sed -i '1c\PM7 THREADS=1 CHARGE=1 PRECISE CYCLES=3000 DISP' *.mop

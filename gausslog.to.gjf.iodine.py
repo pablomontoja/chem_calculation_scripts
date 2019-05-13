@@ -23,7 +23,7 @@ class GaussianLog():
 		for index, line in enumerate(self.file_content):
 			if '#' in line: self.calculation_commands = line
 			if 'Symbolic Z-matrix:' in line: self.initial_matrix_position = index+2
-			if 'Coordinates (Angstroms)' in line: self.where_are_matrices.append(index+3)
+			if 'orientation:' in line: self.where_are_matrices.append(index+5)
 			if 'Charge =' in line:
 				self.charge = int(line.split("=")[1].split()[0])
 				self.multiplicity = int(line.split("=")[2].split()[0])
@@ -41,7 +41,7 @@ class GaussianLog():
 		for index, coordinate in enumerate(self.last_matrix):			
 			self.final_matrix.append([self.atoms[index]] + coordinate)
 
-		#print self.initial_matrix_position
+		print self.initial_matrix_position
 
 		self.save_gjf()
 
@@ -70,17 +70,11 @@ class GaussianLog():
 
 	def save_gjf(self):
 		gjf_file = []
-		suffix = "_SAS"
 
-		gjf_file.append("%rwf=" + self.filename.split(".")[0] + suffix + ".rwf\n")
-		gjf_file.append("%chk=" + self.filename.split(".")[0] + suffix + ".chk\n")
-		gjf_file.append("%mem=98GB\n")
+		gjf_file.append("%chk=" + self.filename.split(".")[0] + ".chk\n")
+		gjf_file.append("%mem=32GB\n")
 		gjf_file.append("%nprocshared=24\n")
-		
-		gjf_file.append("# wB97XD/6-31g(d)\n")
-		# gjf_file.append("# m062x/GEN PSEUDO=READ opt freq scrf=(read,smd,solvent=toluene) nosymm\n")
-		# gjf_file.append("# m062x/6-311g(d) freq scrf=(read,smd,solvent=toluene) nosymm\n")
-		gjf_file.append("# m062x/GEN PSEUDO=READ opt(ts,calcfc,noeigen) freq(noraman) scrf=(read,smd,solvent=toluene) nosymm\n")
+		gjf_file.append("# freq m062x/GEN PSEUDO=READ\n")
 		gjf_file.append("\n")
 		gjf_file.append(self.filename + "\n")
 		gjf_file.append("\n")
@@ -91,30 +85,37 @@ class GaussianLog():
 
 		gjf_file.append("\n")
 
-		# ##############################
-		# gjf_file.append("I 0\n")
-		# gjf_file.append("DEF2TZVP\n")
-		# gjf_file.append("****\n")
-		# gjf_file.append("C H N O 0\n")
-		# gjf_file.append("6-311g(d)\n")
-		# gjf_file.append("****\n")
+		gjf_file.append("I 0\n")
+		gjf_file.append("DEF2TZVP\n")
+		gjf_file.append("****\n")
+		gjf_file.append("C H N O 0\n")
+		gjf_file.append("6-311g(d)\n")
+		gjf_file.append("****\n")
 
-		# gjf_file.append("\n")
+		gjf_file.append("\n")
 
-		# gjf_file.append("I 0\n")
-		# gjf_file.append("DEF2TZVP\n")
+		gjf_file.append("I 0\n")
+		gjf_file.append("DEF2TZVP\n")
 
-		# gjf_file.append("\n")
-		# gjf_file.append("Radii=Bondi\n")
-		# gjf_file.append("Surface=sas\n")
-		# gjf_file.append("\n")
-		# gjf_file.append("\n")
-		# gjf_file.append("\n")
-		# ###############################
+		gjf_file.append("\n")
+		gjf_file.append("\n")
 
-		with open(self.filename.split(".")[0]+ suffix + '.gjf', 'w') as writefile:
+		with open(self.filename.split(".")[0]+'_FREQ.gjf', 'w') as writefile:
 			for line in gjf_file:
 				writefile.write(line)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

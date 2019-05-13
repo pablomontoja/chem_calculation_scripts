@@ -23,7 +23,6 @@ class Conformer:
 		self.corrected_enthalpy=0.000
 		self.corrected_free_energy=0.000
 		self.counterpoise_corrected_energy=0.000
-		self.cavity_surface_area=0.000
 
 		self.scfenergies = []
 		#self.cp_lastscfenergy = 0.000
@@ -47,11 +46,10 @@ class Conformer:
 			if "Sum of electronic and thermal Energies" in line: self.corrected_energy = self.lastscfenergy + self.energy_correction
 			#if "Sum of electronic and thermal Enthalpies" in line: self.corrected_enthalpy = float(line.rstrip('\n').split("=")[1].strip())
 			if "Sum of electronic and thermal Enthalpies" in line: self.corrected_enthalpy = self.lastscfenergy + self.enthalpy_correction
-			if "Counterpoise corrected energy" in line: self.counterpoise_corrected_energy = float(line.rstrip('\n').split("=")[1].strip() )
+			if "Counterpoise corrected energy" in line: self.counterpoise_corrected_energy = float(line.rstrip('\n').split("=")[1].strip())
 			if "Sum of electronic and thermal Free Energies" in line:
 				self.corrected_free_energy = self.lastscfenergy + self.free_energy_correction
 				self.lastscfinkjpermoleFreeEnergy = self.convertHartreeTokJPerMole(self.corrected_free_energy)
-			if "Cavity surface area" in line: self.cavity_surface_area = float(line.rstrip('\n').split("=")[1].strip().split(" ")[0].strip())
 
 	def extractEnergy(self, line):
 		self.scfenergies.append(float(line.rstrip('\n').split("=")[1].strip().split(" ")[0]))
@@ -175,12 +173,20 @@ print calculateConformers.eqv_counterpoise_corrected_energy
 print "-------------------------------------------------------------------------------------------"
 
 if len(freeEnergyConformers) != 0:
+
+	print ""
 	print "---------------------------------------------------------------------------------------"
-	print "---------------------------------------------------------------------------------------"
+	print "----------------------     ENTALPIES   ------------------------------------------------"
 	calculateFreeEnergyConformers = FreeEnergyConformerTools(freeEnergyConformers)
 
 	for conf in freeEnergyConformers:
-		print conf.filename + "   :   G=" + str(conf.corrected_free_energy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff)
+		print conf.filename + "   :   H= " + str(conf.corrected_enthalpy) + "   :   H correction= " + str(conf.enthalpy_correction)
+
+	print "---------------------------------------------------------------------------------------"
+	print "--------------------------- FREE ENERGIES ---------------------------------------------"
+
+	for conf in freeEnergyConformers:
+		print conf.filename + "   :   G= " + str(conf.corrected_free_energy) + "   :   " + str(round(float(conf.ratio.split('%')[0]),2)) + "%   :   " + str(conf.diff) + "   :   G correction= " + str(conf.free_energy_correction)
 
 	print "---------------------------------------------------------------------------------------"
 	print "--------------------------------------EQUIVALENT---------------------------------------"
